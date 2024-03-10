@@ -5,7 +5,7 @@ import {
   MutationCache,
   onlineManager,
 } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools/build/modern/production.js";
 import { Suspense, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Loader } from "./loader.tsx";
@@ -25,7 +25,7 @@ const queryClient: QueryClient = new QueryClient({
   }),
 });
 
-export function useOfflineIndicator() {
+function useOfflineIndicator() {
   useEffect(() => {
     return onlineManager.subscribe(() => {
       if (onlineManager.isOnline()) {
@@ -45,6 +45,7 @@ export function useOfflineIndicator() {
 
 function App() {
   useOfflineIndicator();
+
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="bg-slate-900 border-b border-slate-800 flex items-center justify-between py-4 px-8 box-border">
