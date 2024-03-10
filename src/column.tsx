@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import invariant from "tiny-invariant";
 
 import {
-  ItemMutation,
   INTENTS,
+  ItemMutation,
   type RenderedItem,
   CONTENT_TYPES,
 } from "./types";

@@ -26,6 +26,8 @@ export const boardSchema = z.object({
   items: z.array(itemSchema),
 });
 
+export const boardUpdateSchema = boardSchema.pick({ id: true, name: true });
+
 export type Board = z.infer<typeof boardSchema>;
 export type Column = z.infer<typeof columnSchema>;
 export type Item = z.infer<typeof itemSchema>;
@@ -46,7 +48,7 @@ export const handlers = [
       { ...newColumn, order: board.columns.length + 1 },
     ];
 
-    await delay(500);
+    await delay();
 
     return HttpResponse.json({ ok: true });
   }),
@@ -54,12 +56,20 @@ export const handlers = [
     const newItem = itemSchema.parse(await request.json());
     board.items = [...board.items, newItem];
 
-    await delay(500);
+    await delay();
+
+    return HttpResponse.json({ ok: true });
+  }),
+  http.post("/board/update", async ({ request }) => {
+    const { name } = boardUpdateSchema.parse(await request.json());
+    board.name = name;
+
+    await delay();
 
     return HttpResponse.json({ ok: true });
   }),
   http.get("/board/*", async () => {
-    await delay(250);
+    await delay();
     return HttpResponse.json(board);
   }),
   /*...db.board.toHandlers("rest"),
