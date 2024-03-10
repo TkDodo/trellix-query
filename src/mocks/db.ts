@@ -25,6 +25,11 @@ export const boardSchema = z.object({
   items: z.array(itemSchema),
 });
 
+let extraDelay = 0;
+export function setExtraDelay(delay: number) {
+  extraDelay = delay;
+}
+
 export const updateSchema = z.union([
   z
     .object({ intent: z.literal("updateBoardName") })
@@ -67,6 +72,7 @@ export const handlers = [
     ];
 
     await delay();
+    await delay(extraDelay);
 
     return HttpResponse.json({ ok: true });
   }),
@@ -75,6 +81,7 @@ export const handlers = [
     upsertItem(newItem);
 
     await delay();
+    await delay(extraDelay);
 
     return HttpResponse.json({ ok: true });
   }),
@@ -83,6 +90,7 @@ export const handlers = [
 
     board.items = board.items.filter((item) => item.id !== id);
     await delay();
+    await delay(extraDelay);
 
     return HttpResponse.json({ ok: true });
   }),
@@ -91,6 +99,7 @@ export const handlers = [
 
     upsertItem(item);
     await delay();
+    await delay(extraDelay);
 
     return HttpResponse.json({ ok: true });
   }),
@@ -106,14 +115,13 @@ export const handlers = [
     }
 
     await delay();
+    await delay(extraDelay);
 
     return HttpResponse.json({ ok: true });
   }),
   http.get("/board/*", async () => {
     await delay();
+    await delay(extraDelay);
     return HttpResponse.json(board);
   }),
-  /*...db.board.toHandlers("rest"),
-  ...db.column.toHandlers("rest"),
-  ...db.item.toHandlers("rest"),*/
 ];

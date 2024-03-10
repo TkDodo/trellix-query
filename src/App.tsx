@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools/build/modern/
 import { Suspense, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Loader } from "./loader.tsx";
+import { setExtraDelay } from "./mocks/db.ts";
 
 const queryClient: QueryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +55,24 @@ function App() {
           <div className="text-slate-500">a React Query Demo</div>
         </div>
         <div className="flex items-center gap-6">
+          <label
+            htmlFor="countries"
+            className="block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Delay
+          </label>
+          <select
+            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            onChange={(event) => {
+              setExtraDelay(Number(event.currentTarget.value));
+            }}
+            defaultValue="0"
+          >
+            <option value="0">None</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="2000">2000</option>
+          </select>
           <IconLink
             href="https://github.com/tkdodo/trellix-query"
             label="Source"
