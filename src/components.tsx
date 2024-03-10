@@ -63,13 +63,17 @@ export function EditableText({
     value = variables.name;
   }
 
+  const submit = (form: HTMLFormElement) => {
+    const formData = new FormData(form);
+    mutate(updateSchema.parse(Object.fromEntries(formData.entries())));
+  };
+
   return edit ? (
     <form
       onSubmit={(event) => {
         event.preventDefault();
 
-        const formData = new FormData(event.currentTarget);
-        mutate(updateSchema.parse(Object.fromEntries(formData.entries())));
+        submit(event.currentTarget);
 
         flushSync(() => {
           setEdit(false);
@@ -99,7 +103,7 @@ export function EditableText({
             inputRef.current?.value !== value &&
             inputRef.current?.value.trim() !== ""
           ) {
-            fetcher.submit(event.currentTarget);
+            submit(event.currentTarget.form!);
           }
           setEdit(false);
         }}
