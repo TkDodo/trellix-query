@@ -1,7 +1,7 @@
 export interface RenderedItem {
   id: string;
   title: string;
-  order?: number;
+  order: number;
   content?: string;
   columnId: string;
 }

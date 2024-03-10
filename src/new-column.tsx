@@ -5,7 +5,7 @@ import invariant from "tiny-invariant";
 import { CancelButton, SaveButton } from "./components";
 import { Icon } from "./icons/icons.tsx";
 import { useNewColumnMutation } from "./queries.ts";
-import { columnSchema } from "./mocks/db.ts";
+import { newColumnSchema } from "./mocks/db.ts";
 
 export function NewColumn({
   boardId,
@@ -30,7 +30,7 @@ export function NewColumn({
         formData.set("id", crypto.randomUUID());
         invariant(inputRef.current, "missing input ref");
         inputRef.current.value = "";
-        mutate(columnSchema.parse(Object.fromEntries(formData.entries())), {
+        mutate(newColumnSchema.parse(Object.fromEntries(formData.entries())), {
           onSuccess: () => {
             onAdd();
           },

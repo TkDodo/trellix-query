@@ -4,27 +4,27 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import ky from "ky";
-import { Board, updateSchema, Column, Item } from "./mocks/db.ts";
+import {
+  Board,
+  updateSchema,
+  deleteItemSchema,
+  newColumnSchema,
+  itemSchema,
+} from "./mocks/db.ts";
 import { z } from "zod";
 
 export const boardQueries = {
-  all: () => ["board"],
   detail: (id: number) =>
     queryOptions({
-      queryKey: [...boardQueries.all(), id],
+      queryKey: ["board", id],
       queryFn: () => ky.get(`/board/${id}`).json<Board>(),
-    }),
-  columns: (boardId: number) =>
-    queryOptions({
-      queryKey: [...boardQueries.detail(boardId).queryKey, "columns"],
-      queryFn: () => ky.get(`/board/${boardId}/columns`).json<Array<Column>>(),
     }),
 };
 
 export function useNewColumnMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (json: Pick<Column, "name" | "id" | "boardId">) =>
+    mutationFn: (json: z.infer<typeof newColumnSchema>) =>
       ky.post("/board/newColumn", { json }),
     onMutate: async (variables) => {
       await queryClient.cancelQueries();
@@ -34,7 +34,10 @@ export function useNewColumnMutation() {
           oldData
             ? {
                 ...oldData,
-                columns: [...oldData.columns, variables],
+                columns: [
+                  ...oldData.columns,
+                  { ...variables, order: oldData.columns.length + 1 },
+                ],
               }
             : undefined,
       );
@@ -46,7 +49,7 @@ export function useNewCardMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (json: Pick<Item, "id" | "columnId" | "title" | "boardId">) =>
+    mutationFn: (json: z.infer<typeof itemSchema>) =>
       ky.post("/board/newItem", { json }),
     onMutate: async (variables) => {
       await queryClient.cancelQueries();
@@ -57,6 +60,29 @@ export function useNewCardMutation() {
             ? {
                 ...oldData,
                 items: [...oldData.items, variables],
+              }
+            : undefined,
+      );
+    },
+  });
+}
+
+export function useDeleteCardMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (json: z.infer<typeof deleteItemSchema>) =>
+      ky.post("/board/deleteItem", { json }),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries();
+
+      queryClient.setQueryData(
+        boardQueries.detail(variables.boardId).queryKey,
+        (oldData) =>
+          oldData
+            ? {
+                ...oldData,
+                items: oldData.items.filter((item) => item.id !== variables.id),
               }
             : undefined,
       );

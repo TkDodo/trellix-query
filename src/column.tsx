@@ -13,6 +13,7 @@ import { flushSync } from "react-dom";
 import { EditableText } from "./components";
 import { Icon } from "./icons/icons.tsx";
 import { NewCard } from "./new-card.tsx";
+import { Card } from "./card.tsx";
 
 interface ColumnProps {
   name: string;
@@ -95,19 +96,19 @@ export function Column({ name, columnId, boardId, items }: ColumnProps) {
         {[...items]
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
           .map((item, index, items) => (
-            <div key={item.id}>{item.title}</div>
-            // <Card
-            //   key={item.id}
-            //   title={item.title}
-            //   content={item.content}
-            //   id={item.id}
-            //   order={item.order}
-            //   columnId={columnId}
-            //   previousOrder={items[index - 1] ? items[index - 1].order : 0}
-            //   nextOrder={
-            //     items[index + 1] ? items[index + 1].order : item.order + 1
-            //   }
-            // />
+            <Card
+              key={item.id}
+              title={item.title}
+              content={item.content ?? ""}
+              id={item.id}
+              boardId={boardId}
+              order={item.order}
+              columnId={columnId}
+              previousOrder={items[index - 1] ? items[index - 1].order : 0}
+              nextOrder={
+                items[index + 1] ? items[index + 1].order : item.order + 1
+              }
+            />
           ))}
       </ul>
       {edit ? (
