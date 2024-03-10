@@ -9,6 +9,11 @@ import { Suspense } from "react";
 import { Skeleton } from "./Skeleton.tsx";
 
 const queryClient: QueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnReconnect: () => !queryClient.isMutating(),
+    },
+  },
   mutationCache: new MutationCache({
     onSettled: () => {
       if (queryClient.isMutating() === 1) {
