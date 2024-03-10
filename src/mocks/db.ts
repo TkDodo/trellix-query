@@ -49,6 +49,15 @@ const board: Board = {
   items: [],
 };
 
+const upsertItem = (item: Item) => {
+  const existingItem = board.items.find((i) => i.id === item.id);
+  if (existingItem) {
+    Object.assign(existingItem, item);
+  } else {
+    board.items.push(item);
+  }
+};
+
 export const handlers = [
   http.post("/board/newColumn", async ({ request }) => {
     const newColumn = newColumnSchema.parse(await request.json());
@@ -63,7 +72,7 @@ export const handlers = [
   }),
   http.post("/board/newItem", async ({ request }) => {
     const newItem = itemSchema.parse(await request.json());
-    board.items = [...board.items, newItem];
+    upsertItem(newItem);
 
     await delay();
 
@@ -73,6 +82,14 @@ export const handlers = [
     const { id } = deleteItemSchema.parse(await request.json());
 
     board.items = board.items.filter((item) => item.id !== id);
+    await delay();
+
+    return HttpResponse.json({ ok: true });
+  }),
+  http.post("/board/moveItem", async ({ request }) => {
+    const item = itemSchema.parse(await request.json());
+
+    upsertItem(item);
     await delay();
 
     return HttpResponse.json({ ok: true });

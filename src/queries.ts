@@ -30,13 +30,13 @@ export function useNewColumnMutation() {
       await queryClient.cancelQueries();
       queryClient.setQueryData(
         boardQueries.detail(variables.boardId).queryKey,
-        (oldData) =>
-          oldData
+        (board) =>
+          board
             ? {
-                ...oldData,
+                ...board,
                 columns: [
-                  ...oldData.columns,
-                  { ...variables, order: oldData.columns.length + 1 },
+                  ...board.columns,
+                  { ...variables, order: board.columns.length + 1 },
                 ],
               }
             : undefined,
@@ -55,11 +55,35 @@ export function useNewCardMutation() {
       await queryClient.cancelQueries();
       queryClient.setQueryData(
         boardQueries.detail(variables.boardId).queryKey,
-        (oldData) =>
-          oldData
+        (board) =>
+          board
             ? {
-                ...oldData,
-                items: [...oldData.items, variables],
+                ...board,
+                items: [...board.items, variables],
+              }
+            : undefined,
+      );
+    },
+  });
+}
+
+export function useMoveCardMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (json: z.infer<typeof itemSchema>) =>
+      ky.post("/board/moveItem", { json }),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries();
+      queryClient.setQueryData(
+        boardQueries.detail(variables.boardId).queryKey,
+        (board) =>
+          board
+            ? {
+                ...board,
+                items: board.items.map((i) =>
+                  i.id === variables.id ? variables : i,
+                ),
               }
             : undefined,
       );
@@ -78,11 +102,11 @@ export function useDeleteCardMutation() {
 
       queryClient.setQueryData(
         boardQueries.detail(variables.boardId).queryKey,
-        (oldData) =>
-          oldData
+        (board) =>
+          board
             ? {
-                ...oldData,
-                items: oldData.items.filter((item) => item.id !== variables.id),
+                ...board,
+                items: board.items.filter((item) => item.id !== variables.id),
               }
             : undefined,
       );

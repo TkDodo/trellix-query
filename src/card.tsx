@@ -1,9 +1,9 @@
 import invariant from "tiny-invariant";
 import { useState } from "react";
 
-import { ItemMutation, CONTENT_TYPES } from "./types";
+import { CONTENT_TYPES } from "./types";
 import { Icon } from "./icons/icons.tsx";
-import { useDeleteCardMutation } from "./queries.ts";
+import { useDeleteCardMutation, useMoveCardMutation } from "./queries.ts";
 import { deleteItemSchema } from "./mocks/db.ts";
 
 interface CardProps {
@@ -32,6 +32,7 @@ export function Card({
   );
 
   const deleteCard = useDeleteCardMutation();
+  const moveCard = useMoveCardMutation();
 
   return (
     <li
@@ -59,21 +60,13 @@ export function Card({
         const droppedOrder = acceptDrop === "top" ? previousOrder : nextOrder;
         const moveOrder = (droppedOrder + order) / 2;
 
-        const mutation: ItemMutation = {
+        moveCard.mutate({
           order: moveOrder,
-          columnId: columnId,
+          columnId,
+          boardId,
           id: transfer.id,
           title: transfer.title,
-        };
-
-        // submit(
-        //   { ...mutation, intent: INTENTS.moveItem },
-        //   {
-        //     method: "post",
-        //     navigate: false,
-        //     fetcherKey: `card:${transfer.id}`,
-        //   },
-        // );
+        });
 
         setAcceptDrop("none");
       }}

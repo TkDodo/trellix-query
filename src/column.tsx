@@ -1,19 +1,13 @@
 import { useState, useRef } from "react";
 import invariant from "tiny-invariant";
 
-import {
-  INTENTS,
-  ItemMutation,
-  type RenderedItem,
-  CONTENT_TYPES,
-} from "./types";
-//import { NewCard } from "./new-card";
+import { INTENTS, type RenderedItem, CONTENT_TYPES } from "./types";
 import { flushSync } from "react-dom";
-//import { Card } from "./card";
 import { EditableText } from "./components";
 import { Icon } from "./icons/icons.tsx";
 import { NewCard } from "./new-card.tsx";
 import { Card } from "./card.tsx";
+import { useMoveCardMutation } from "./queries.ts";
 
 interface ColumnProps {
   name: string;
@@ -31,6 +25,8 @@ export function Column({ name, columnId, boardId, items }: ColumnProps) {
     invariant(listRef.current);
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }
+
+  const moveCard = useMoveCardMutation();
 
   return (
     <div
@@ -57,23 +53,13 @@ export function Column({ name, columnId, boardId, items }: ColumnProps) {
         invariant(transfer.id, "missing transfer.id");
         invariant(transfer.title, "missing transfer.title");
 
-        const mutation: ItemMutation = {
+        moveCard.mutate({
           order: 1,
           columnId: columnId,
+          boardId,
           id: transfer.id,
           title: transfer.title,
-        };
-
-        // submit(
-        //   { ...mutation, intent: INTENTS.moveItem },
-        //   {
-        //     method: "post",
-        //     navigate: false,
-        //     // use the same fetcher instance for any mutations on this card so
-        //     // that interruptions cancel the earlier request and revalidation
-        //     fetcherKey: `card:${transfer.id}`,
-        //   },
-        // );
+        });
 
         setAcceptDrop(false);
       }}
