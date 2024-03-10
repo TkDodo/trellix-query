@@ -44,7 +44,7 @@ export const handlers = [
     const newColumn = (await request.json()) as Column;
     board.columns = [
       ...board.columns,
-      { ...newColumn, boardId: 1, items: [], order: board.columns.length + 1 },
+      { ...newColumn, order: board.columns.length + 1 },
     ];
 
     await delay(500);

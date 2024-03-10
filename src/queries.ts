@@ -1,7 +1,6 @@
 import {
   queryOptions,
   useMutation,
-  useMutationState,
   useQueryClient,
 } from "@tanstack/react-query";
 import ky from "ky";
@@ -22,22 +21,22 @@ export const boardQueries = {
 };
 
 export function useNewColumnMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ["columns", "create"],
-    mutationFn: (input: Pick<Column, "name" | "id">) =>
+    mutationFn: (input: Pick<Column, "name" | "id" | "boardId">) =>
       ky.post("/board/newColumn", { json: input }),
-  });
-}
-
-// These are the inflight columns that are being created, instead of managing
-// state ourselves, we just ask React Query for the state
-export function usePendingColumns() {
-  return useMutationState({
-    filters: {
-      mutationKey: ["columns", "create"],
-      status: "pending",
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries();
+      queryClient.setQueryData(
+        boardQueries.detail(variables.boardId).queryKey,
+        (oldData) =>
+          oldData
+            ? {
+                ...oldData,
+                columns: [...oldData.columns, { ...variables }],
+              }
+            : undefined,
+      );
     },
-    select: (mutation) =>
-      mutation.state.variables as Pick<Column, "name" | "id">,
   });
 }

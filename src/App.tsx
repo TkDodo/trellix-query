@@ -8,48 +8,11 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 import { Skeleton } from "./Skeleton.tsx";
 
-function pendingFactory() {
-  let resolve: (value?: unknown) => void | undefined;
-  let promise = new Promise((res) => {
-    resolve = res;
-  });
-  let fakePending = 0;
-
-  const init = () => {
-    fakePending = 0;
-    promise = new Promise((res) => {
-      resolve = res;
-    });
-  };
-
-  return {
-    inc: () => {
-      fakePending++;
-      return promise;
-    },
-    init,
-    reset: () => {
-      resolve?.();
-      init();
-    },
-    count: () => fakePending,
-  };
-}
-
-const pending = pendingFactory();
-
 const queryClient: QueryClient = new QueryClient({
   mutationCache: new MutationCache({
-    onMutate: () => {
-      return queryClient.cancelQueries();
-    },
-    onSettled: async () => {
-      if (queryClient.isMutating() - pending.count() === 1) {
-        console.log("invalidating");
-        await queryClient.invalidateQueries();
-        pending.reset();
-      } else {
-        return pending.inc();
+    onSettled: () => {
+      if (queryClient.isMutating() === 1) {
+        return queryClient.invalidateQueries();
       }
     },
   }),

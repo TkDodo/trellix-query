@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import invariant from "tiny-invariant";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { boardQueries, usePendingColumns } from "./queries.ts";
+import { boardQueries } from "./queries.ts";
 import { EditableText } from "./components.tsx";
 import { INTENTS } from "./types.ts";
 import { NewColumn } from "./new-column.tsx";
@@ -19,15 +19,7 @@ export function Board() {
       scrollContainerRef.current.scrollWidth;
   }
 
-  // merge pending and existing columns
-  const optAddingColumns = usePendingColumns();
-
-  console.log("opt", optAddingColumns);
-
-  const columns = new Map<string, Column>();
-  for (const column of [...board.columns, ...optAddingColumns]) {
-    columns.set(column.id, { ...column });
-  }
+  const columns = board.columns;
 
   return (
     <div
@@ -50,7 +42,7 @@ export function Board() {
       </h1>
 
       <div className="flex flex-grow min-h-0 h-full items-start gap-4 px-8 pb-4">
-        {[...columns.values()].map((col) => {
+        {columns.map((col) => {
           return (
             <ColumnComponent
               key={col.id}
