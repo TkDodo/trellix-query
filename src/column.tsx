@@ -22,8 +22,6 @@ interface ColumnProps {
 }
 
 export function Column({ name, columnId, boardId, items }: ColumnProps) {
-  // const submit = useSubmit();
-
   const [acceptDrop, setAcceptDrop] = useState(false);
   const [edit, setEdit] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
@@ -89,7 +87,7 @@ export function Column({ name, columnId, boardId, items }: ColumnProps) {
           buttonClassName="block rounded-lg text-left w-full border border-transparent py-1 px-2 font-medium text-slate-600"
         >
           <input type="hidden" name="intent" value={INTENTS.updateColumn} />
-          <input type="hidden" name="columnId" value={columnId} />
+          <input type="hidden" name="id" value={columnId} />
         </EditableText>
       </div>
 

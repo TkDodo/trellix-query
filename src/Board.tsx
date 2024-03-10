@@ -1,15 +1,15 @@
 import { useRef } from "react";
 import invariant from "tiny-invariant";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { boardQueries, useUpdateBoardName } from "./queries.ts";
+import { boardQueries } from "./queries.ts";
 import { EditableText } from "./components.tsx";
 import { NewColumn } from "./new-column.tsx";
 import { Column as ColumnComponent } from "./column.tsx";
 import type { Column } from "./mocks/db.ts";
+import { INTENTS } from "./types.ts";
 
 export function Board() {
   const { data: board } = useSuspenseQuery(boardQueries.detail(1));
-  const { mutate, variables, status } = useUpdateBoardName();
 
   // scroll right when new columns are added
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -34,8 +34,6 @@ export function Board() {
     column.items.push(item);
   }
 
-  const boardName = status === "pending" ? variables.name : board.name;
-
   return (
     <div
       className="h-full min-h-0 flex flex-col overflow-x-scroll"
@@ -44,16 +42,16 @@ export function Board() {
     >
       <h1>
         <EditableText
-          value={boardName}
+          value={board.name}
           fieldName="name"
           inputClassName="mx-8 my-4 text-2xl font-medium border border-slate-400 rounded-lg py-1 px-2 text-black"
           buttonClassName="mx-8 my-4 text-2xl font-medium block rounded-lg text-left border border-transparent py-1 px-2 text-slate-800"
-          buttonLabel={`Edit board "${boardName}" name`}
+          buttonLabel={`Edit board "${board.name}" name`}
           inputLabel="Edit board name"
-          onSubmit={(name) => {
-            mutate({ name, id: board.id });
-          }}
-        />
+        >
+          <input type="hidden" name="intent" value={INTENTS.updateBoardName} />
+          <input type="hidden" name="id" value={board.id} />
+        </EditableText>
       </h1>
 
       <div className="flex flex-grow min-h-0 h-full items-start gap-4 px-8 pb-4">

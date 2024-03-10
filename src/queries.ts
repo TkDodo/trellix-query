@@ -4,7 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import ky from "ky";
-import { Board, boardUpdateSchema, Column, Item } from "./mocks/db.ts";
+import { Board, updateSchema, Column, Item } from "./mocks/db.ts";
 import { z } from "zod";
 
 export const boardQueries = {
@@ -64,9 +64,9 @@ export function useNewCardMutation() {
   });
 }
 
-export function useUpdateBoardName() {
+export function useUpdateMutation() {
   return useMutation({
-    mutationFn: (json: z.infer<typeof boardUpdateSchema>) =>
+    mutationFn: (json: z.infer<typeof updateSchema>) =>
       ky.post("/board/update", { json }),
   });
 }

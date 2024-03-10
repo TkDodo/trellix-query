@@ -1,5 +1,7 @@
 import { forwardRef, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { useUpdateMutation } from "./queries.ts";
+import { updateSchema } from "./mocks/db.ts";
 
 export const SaveButton = forwardRef<
   HTMLButtonElement,
@@ -35,36 +37,47 @@ export const CancelButton = forwardRef<
 });
 
 export function EditableText({
+  children,
   fieldName,
   value,
   inputClassName,
   inputLabel,
   buttonClassName,
   buttonLabel,
-  onSubmit,
 }: {
+  children: React.ReactNode;
   fieldName: string;
   value: string;
   inputClassName: string;
   inputLabel: string;
   buttonClassName: string;
   buttonLabel: string;
-  onSubmit: (newName: string) => void;
 }) {
+  const { mutate, status, variables } = useUpdateMutation();
   const [edit, setEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // optimistic update
+  if (status === "pending") {
+    value = variables.name;
+  }
+
   return edit ? (
     <form
-      onSubmit={() => {
-        onSubmit(inputRef.current?.value ?? "");
+      onSubmit={(event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        mutate(updateSchema.parse(Object.fromEntries(formData.entries())));
+
         flushSync(() => {
           setEdit(false);
         });
         buttonRef.current?.focus();
       }}
     >
+      {children}
       <input
         required
         ref={inputRef}
@@ -81,12 +94,12 @@ export function EditableText({
             buttonRef.current?.focus();
           }
         }}
-        onBlur={() => {
+        onBlur={(event) => {
           if (
             inputRef.current?.value !== value &&
             inputRef.current?.value.trim() !== ""
           ) {
-            onSubmit(inputRef.current?.value ?? "");
+            fetcher.submit(event.currentTarget);
           }
           setEdit(false);
         }}

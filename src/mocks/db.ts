@@ -26,7 +26,14 @@ export const boardSchema = z.object({
   items: z.array(itemSchema),
 });
 
-export const boardUpdateSchema = boardSchema.pick({ id: true, name: true });
+export const updateSchema = z.union([
+  z
+    .object({ intent: z.literal("updateBoardName") })
+    .merge(boardSchema.pick({ id: true, name: true })),
+  z
+    .object({ intent: z.literal("updateColumn") })
+    .merge(columnSchema.pick({ id: true, name: true })),
+]);
 
 export type Board = z.infer<typeof boardSchema>;
 export type Column = z.infer<typeof columnSchema>;
@@ -61,8 +68,15 @@ export const handlers = [
     return HttpResponse.json({ ok: true });
   }),
   http.post("/board/update", async ({ request }) => {
-    const { name } = boardUpdateSchema.parse(await request.json());
-    board.name = name;
+    const payload = updateSchema.parse(await request.json());
+    if (payload.intent === "updateBoardName") {
+      board.name = payload.name;
+    } else if (payload.intent === "updateColumn") {
+      const column = board.columns.find((c) => c.id === payload.id);
+      if (column) {
+        column.name = payload.name;
+      }
+    }
 
     await delay();
 
