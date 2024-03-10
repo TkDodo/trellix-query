@@ -3,10 +3,12 @@ import {
   QueryClientProvider,
   QueryClient,
   MutationCache,
+  onlineManager,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Suspense } from "react";
-import { Skeleton } from "./Skeleton.tsx";
+import { Suspense, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { Loader } from "./loader.tsx";
 
 const queryClient: QueryClient = new QueryClient({
   defaultOptions: {
@@ -23,7 +25,26 @@ const queryClient: QueryClient = new QueryClient({
   }),
 });
 
+export function useOfflineIndicator() {
+  useEffect(() => {
+    return onlineManager.subscribe(() => {
+      if (onlineManager.isOnline()) {
+        toast.success("online", {
+          id: "ReactQuery",
+          duration: 2000,
+        });
+      } else {
+        toast.error("offline", {
+          id: "ReactQuery",
+          duration: Infinity,
+        });
+      }
+    });
+  }, []);
+}
+
 function App() {
+  useOfflineIndicator();
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="bg-slate-900 border-b border-slate-800 flex items-center justify-between py-4 px-8 box-border">
@@ -47,11 +68,12 @@ function App() {
 
       <div className="flex-grow min-h-0 h-full">
         <QueryClientProvider client={queryClient}>
-          <Suspense fallback={<Skeleton />}>
+          <Suspense fallback={<Loader />}>
             <Board />
           </Suspense>
           <ReactQueryDevtools />
         </QueryClientProvider>
+        <Toaster />
       </div>
     </div>
   );
