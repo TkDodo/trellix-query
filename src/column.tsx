@@ -1,22 +1,28 @@
 import { useState, useRef } from "react";
 import invariant from "tiny-invariant";
 
-import { ItemMutation, INTENTS, type RenderedItem } from "./types";
+import {
+  ItemMutation,
+  INTENTS,
+  type RenderedItem,
+  CONTENT_TYPES,
+} from "./types";
 //import { NewCard } from "./new-card";
 import { flushSync } from "react-dom";
 //import { Card } from "./card";
 import { EditableText } from "./components";
 import { Icon } from "./icons/icons.tsx";
+import { NewCard } from "./new-card.tsx";
 
 interface ColumnProps {
   name: string;
+  boardId: number;
   columnId: string;
   items: RenderedItem[];
 }
 
-export function Column({ name, columnId, items }: ColumnProps) {
-  return <div>{name}</div>;
-  const submit = useSubmit();
+export function Column({ name, columnId, boardId, items }: ColumnProps) {
+  // const submit = useSubmit();
 
   const [acceptDrop, setAcceptDrop] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -59,16 +65,16 @@ export function Column({ name, columnId, items }: ColumnProps) {
           title: transfer.title,
         };
 
-        submit(
-          { ...mutation, intent: INTENTS.moveItem },
-          {
-            method: "post",
-            navigate: false,
-            // use the same fetcher instance for any mutations on this card so
-            // that interruptions cancel the earlier request and revalidation
-            fetcherKey: `card:${transfer.id}`,
-          },
-        );
+        // submit(
+        //   { ...mutation, intent: INTENTS.moveItem },
+        //   {
+        //     method: "post",
+        //     navigate: false,
+        //     // use the same fetcher instance for any mutations on this card so
+        //     // that interruptions cancel the earlier request and revalidation
+        //     fetcherKey: `card:${transfer.id}`,
+        //   },
+        // );
 
         setAcceptDrop(false);
       }}
@@ -88,26 +94,28 @@ export function Column({ name, columnId, items }: ColumnProps) {
       </div>
 
       <ul ref={listRef} className="flex-grow overflow-auto">
-        {items
-          .sort((a, b) => a.order - b.order)
+        {[...items]
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
           .map((item, index, items) => (
-            <Card
-              key={item.id}
-              title={item.title}
-              content={item.content}
-              id={item.id}
-              order={item.order}
-              columnId={columnId}
-              previousOrder={items[index - 1] ? items[index - 1].order : 0}
-              nextOrder={
-                items[index + 1] ? items[index + 1].order : item.order + 1
-              }
-            />
+            <div key={item.id}>{item.title}</div>
+            // <Card
+            //   key={item.id}
+            //   title={item.title}
+            //   content={item.content}
+            //   id={item.id}
+            //   order={item.order}
+            //   columnId={columnId}
+            //   previousOrder={items[index - 1] ? items[index - 1].order : 0}
+            //   nextOrder={
+            //     items[index + 1] ? items[index + 1].order : item.order + 1
+            //   }
+            // />
           ))}
       </ul>
       {edit ? (
         <NewCard
           columnId={columnId}
+          boardId={boardId}
           nextOrder={items.length === 0 ? 1 : items[items.length - 1].order + 1}
           onAddCard={() => scrollList()}
           onComplete={() => setEdit(false)}

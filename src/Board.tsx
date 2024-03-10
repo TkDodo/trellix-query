@@ -19,7 +19,22 @@ export function Board() {
       scrollContainerRef.current.scrollWidth;
   }
 
-  const columns = board.columns;
+  const itemsById = new Map(board.items.map((item) => [item.id, item]));
+  type ColumnWithItems = Column & { items: typeof board.items };
+  const columns = new Map<string, ColumnWithItems>();
+  for (const column of [...board.columns]) {
+    columns.set(column.id, { ...column, items: [] });
+  }
+
+  // add items to their columns
+  for (const item of itemsById.values()) {
+    const columnId = item.columnId;
+    const column = columns.get(columnId);
+    invariant(column, "missing column");
+    column.items.push(item);
+  }
+
+  console.log(board);
 
   return (
     <div
@@ -42,12 +57,13 @@ export function Board() {
       </h1>
 
       <div className="flex flex-grow min-h-0 h-full items-start gap-4 px-8 pb-4">
-        {columns.map((col) => {
+        {[...columns.values()].map((col) => {
           return (
             <ColumnComponent
               key={col.id}
               name={col.name}
               columnId={col.id}
+              boardId={board.id}
               items={col.items}
             />
           );

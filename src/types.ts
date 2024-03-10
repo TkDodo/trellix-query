@@ -1,10 +1,15 @@
 export interface RenderedItem {
   id: string;
   title: string;
-  order: number;
-  content: string | null;
+  order?: number;
+  content?: string;
   columnId: string;
 }
+
+export const CONTENT_TYPES = {
+  card: "application/remix-card",
+  column: "application/remix-column",
+};
 
 export const INTENTS = {
   createColumn: "newColumn" as const,

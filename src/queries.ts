@@ -4,7 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import ky from "ky";
-import { Board, Column } from "./mocks/db.ts";
+import { Board, Column, Item } from "./mocks/db.ts";
 
 export const boardQueries = {
   all: () => ["board"],
@@ -23,8 +23,8 @@ export const boardQueries = {
 export function useNewColumnMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: Pick<Column, "name" | "id" | "boardId">) =>
-      ky.post("/board/newColumn", { json: input }),
+    mutationFn: (json: Pick<Column, "name" | "id" | "boardId">) =>
+      ky.post("/board/newColumn", { json }),
     onMutate: async (variables) => {
       await queryClient.cancelQueries();
       queryClient.setQueryData(
@@ -33,7 +33,29 @@ export function useNewColumnMutation() {
           oldData
             ? {
                 ...oldData,
-                columns: [...oldData.columns, { ...variables }],
+                columns: [...oldData.columns, variables],
+              }
+            : undefined,
+      );
+    },
+  });
+}
+
+export function useNewCardMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (json: Pick<Item, "id" | "columnId" | "title" | "boardId">) =>
+      ky.post("/board/newItem", { json }),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries();
+      queryClient.setQueryData(
+        boardQueries.detail(variables.boardId).queryKey,
+        (oldData) =>
+          oldData
+            ? {
+                ...oldData,
+                items: [...oldData.items, variables],
               }
             : undefined,
       );

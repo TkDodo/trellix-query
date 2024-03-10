@@ -5,23 +5,25 @@ import { z } from "zod";
 export const itemSchema = z.object({
   id: z.string(),
   title: z.string(),
-  content: z.string(),
-  order: z.number(),
+  content: z.string().optional(),
+  order: z.coerce.number().optional(),
+  columnId: z.string().uuid(),
+  boardId: z.coerce.number(),
 });
 
 export const columnSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   boardId: z.coerce.number(),
   name: z.string(),
   order: z.number().optional(),
-  items: z.array(itemSchema).optional(),
 });
 
 export const boardSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
   name: z.string(),
   color: z.string(),
   columns: z.array(columnSchema),
+  items: z.array(itemSchema),
 });
 
 export type Board = z.infer<typeof boardSchema>;
@@ -33,15 +35,12 @@ const board: Board = {
   name: "First board",
   color: "#e0e0e0",
   columns: [],
+  items: [],
 };
 
 export const handlers = [
-  http.get("/board/*", async () => {
-    await delay(250);
-    return HttpResponse.json(board);
-  }),
   http.post("/board/newColumn", async ({ request }) => {
-    const newColumn = (await request.json()) as Column;
+    const newColumn = columnSchema.parse(await request.json());
     board.columns = [
       ...board.columns,
       { ...newColumn, order: board.columns.length + 1 },
@@ -50,6 +49,18 @@ export const handlers = [
     await delay(500);
 
     return HttpResponse.json({ ok: true });
+  }),
+  http.post("/board/newItem", async ({ request }) => {
+    const newItem = itemSchema.parse(await request.json());
+    board.items = [...board.items, newItem];
+
+    await delay(500);
+
+    return HttpResponse.json({ ok: true });
+  }),
+  http.get("/board/*", async () => {
+    await delay(250);
+    return HttpResponse.json(board);
   }),
   /*...db.board.toHandlers("rest"),
   ...db.column.toHandlers("rest"),
