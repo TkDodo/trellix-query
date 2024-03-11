@@ -38,7 +38,7 @@ export function NewCard({
         textAreaRef.current.value = "";
 
         mutate(itemSchema.parse(Object.fromEntries(formData.entries())), {
-          onSuccess: () => {
+          onMutate: () => {
             onAddCard();
           },
         });
