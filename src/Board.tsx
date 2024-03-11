@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import invariant from "tiny-invariant";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { boardQueries } from "./queries.ts";
@@ -13,11 +13,13 @@ export function Board() {
 
   // scroll right when new columns are added
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  function scrollRight() {
-    invariant(scrollContainerRef.current, "no scroll container");
-    scrollContainerRef.current.scrollLeft =
-      scrollContainerRef.current.scrollWidth;
-  }
+  const columnRef = useCallback((node: HTMLElement | null) => {
+    if (node) {
+      invariant(scrollContainerRef.current, "no scroll container");
+      scrollContainerRef.current.scrollLeft =
+        scrollContainerRef.current.scrollWidth;
+    }
+  }, []);
 
   const itemsById = new Map(board.items.map((item) => [item.id, item]));
   type ColumnWithItems = Column & { items: typeof board.items };
@@ -58,6 +60,7 @@ export function Board() {
         {[...columns.values()].map((col) => {
           return (
             <ColumnComponent
+              ref={columnRef}
               key={col.id}
               name={col.name}
               columnId={col.id}
@@ -68,7 +71,6 @@ export function Board() {
         })}
         <NewColumn
           boardId={board.id}
-          onAdd={scrollRight}
           editInitially={board.columns.length === 0}
         />
       </div>

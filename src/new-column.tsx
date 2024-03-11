@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { flushSync } from "react-dom";
 import invariant from "tiny-invariant";
 
 import { CancelButton, SaveButton } from "./components";
@@ -9,11 +8,9 @@ import { newColumnSchema } from "./mocks/db.ts";
 
 export function NewColumn({
   boardId,
-  onAdd,
   editInitially,
 }: {
   boardId: number;
-  onAdd: () => void;
   editInitially: boolean;
 }) {
   const [editing, setEditing] = useState(editInitially);
@@ -30,11 +27,7 @@ export function NewColumn({
         formData.set("id", crypto.randomUUID());
         invariant(inputRef.current, "missing input ref");
         inputRef.current.value = "";
-        mutate(newColumnSchema.parse(Object.fromEntries(formData.entries())), {
-          onSuccess: () => {
-            onAdd();
-          },
-        });
+        mutate(newColumnSchema.parse(Object.fromEntries(formData.entries())));
       }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -59,10 +52,7 @@ export function NewColumn({
   ) : (
     <button
       onClick={() => {
-        flushSync(() => {
-          setEditing(true);
-        });
-        onAdd();
+        setEditing(true);
       }}
       aria-label="Add new column"
       className="flex-shrink-0 flex justify-center h-16 w-16 bg-black hover:bg-white bg-opacity-10 hover:bg-opacity-5 rounded-xl"

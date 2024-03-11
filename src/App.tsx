@@ -4,12 +4,15 @@ import {
   QueryClient,
   MutationCache,
   onlineManager,
+  notifyManager,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools/build/modern/production.js";
 import { Suspense, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Loader } from "./loader.tsx";
 import { setExtraDelay } from "./mocks/db.ts";
+
+notifyManager.setScheduler(window.requestAnimationFrame);
 
 const queryClient: QueryClient = new QueryClient({
   defaultOptions: {

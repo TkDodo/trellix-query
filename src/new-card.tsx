@@ -11,13 +11,11 @@ export function NewCard({
   boardId,
   nextOrder,
   onComplete,
-  onAddCard,
 }: {
   columnId: string;
   boardId: number;
   nextOrder: number;
   onComplete: () => void;
-  onAddCard: () => void;
 }) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -37,11 +35,7 @@ export function NewCard({
         invariant(textAreaRef.current);
         textAreaRef.current.value = "";
 
-        mutate(itemSchema.parse(Object.fromEntries(formData.entries())), {
-          onSuccess: () => {
-            onAddCard();
-          },
-        });
+        mutate(itemSchema.parse(Object.fromEntries(formData.entries())));
       }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
